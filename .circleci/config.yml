@@ -1,0 +1,28 @@
+version: 2
+jobs:
+  deploy:
+    docker:
+      - image: circleci/python:3.7-stretch
+    working_directory: /tmp/work_dir
+    steps:
+      - run:
+          name: current dir
+          command: ls $CIRCLE_WORKING_DIRECTORY
+      - run:
+          name: Install awscli
+          command: sudo pip install awscli
+      - checkout
+      - run:
+          name: rm git
+          command: rm -rf .git
+      - run:
+          name: Deploy to S3
+          command: aws s3 sync $CIRCLE_WORKING_DIRECTORY s3://lishengyu.com --delete --exclude ".git" --exclude ".circle"
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - deploy:
+          filters:
+            branches:
+              only: master
